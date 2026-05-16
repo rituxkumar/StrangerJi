@@ -13,7 +13,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCallUser }) => {
   const { onlineUsers, me } = useSocket();
 
-  const filteredUsers = onlineUsers.filter((user) => user.id !== me);
+  const filteredUsers = onlineUsers.filter((user) => user.id !== me && user.id !== undefined);
 
   return (
     <motion.aside

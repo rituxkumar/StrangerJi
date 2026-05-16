@@ -35,12 +35,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
    const socketInstance = io(process.env.NEXT_PUBLIC_SERVER_URL as string);
     
     socketInstance.on('connect', () => {
-      console.log('Connected to socket server');
-      setMe(socketInstance.id || '');
+      const myId = socketInstance.id || '';
+      console.log('Connected to socket server with ID:', myId);
+      setMe(myId);
       
       // Emit that we are online
       socketInstance.emit('user-online', {
-        username: `Stranger_${socketInstance.id?.substring(0, 5)}`,
+        username: `Stranger_${myId.substring(0, 5)}`,
       });
     });
 

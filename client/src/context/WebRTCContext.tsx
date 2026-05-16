@@ -66,6 +66,7 @@ export const WebRTCProvider: React.FC<{
   const [caller, setCaller] = useState('');
   const [callerName, setCallerName] = useState('');
   const [callerSignal, setCallerSignal] = useState<any>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
@@ -81,6 +82,13 @@ export const WebRTCProvider: React.FC<{
       myVideo.current.srcObject = stream;
     }
   }, [stream]);
+
+  // Show remote video when available
+  useEffect(() => {
+    if (remoteStream && userVideo.current && callAccepted) {
+      userVideo.current.srcObject = remoteStream;
+    }
+  }, [remoteStream, callAccepted]);
 
   // Listen for incoming calls
   useEffect(() => {
@@ -132,10 +140,7 @@ export const WebRTCProvider: React.FC<{
 
     peer.on('stream', (currentStream) => {
       console.log('Received remote stream');
-
-      if (userVideo.current) {
-        userVideo.current.srcObject = currentStream;
-      }
+      setRemoteStream(currentStream);
     });
 
     socket.on('call-accepted', (signal) => {
@@ -180,10 +185,7 @@ export const WebRTCProvider: React.FC<{
 
     peer.on('stream', (currentStream) => {
       console.log('Remote stream connected');
-
-      if (userVideo.current) {
-        userVideo.current.srcObject = currentStream;
-      }
+      setRemoteStream(currentStream);
     });
 
     if (callerSignal) {
