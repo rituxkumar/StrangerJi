@@ -117,12 +117,15 @@ export const WebRTCProvider: React.FC<{
       name,
       signal,
     }: any) => {
-      console.log('Incoming call received');
+      console.log('Incoming call received from:', from);
 
-      setReceivingCall(true);
-      setCaller(from);
-      setCallerName(name);
-      setCallerSignal(signal);
+      // Only handle if not already in a call
+      if (!callAccepted && !callEnded) {
+        setCaller(from);
+        setCallerName(name);
+        setCallerSignal(signal);
+        setReceivingCall(true);
+      }
     };
 
     const handleCallEnded = () => {
@@ -158,7 +161,15 @@ export const WebRTCProvider: React.FC<{
         handleCallEnded
       );
     };
-  }, [socket]);
+  }, [socket, callAccepted, callEnded]);
+
+  // Auto-answer effect: Trigger answerCall as soon as receivingCall is true and stream is ready
+  useEffect(() => {
+    if (receivingCall && !callAccepted && stream && callerSignal) {
+      console.log('Auto-answering incoming call...');
+      answerCall();
+    }
+  }, [receivingCall, callAccepted, stream, callerSignal]);
 
   // Call another user
   const callUser = (id: string) => {
