@@ -8,19 +8,18 @@ import ChatContainer from '@/components/ChatContainer';
 import Controls from '@/components/Controls';
 import { useWebRTC } from '@/context/WebRTCContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PhoneIncoming, X, Check } from 'lucide-react';
+import { PhoneIncoming } from 'lucide-react';
 
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const { 
-    callUser, 
-    receivingCall, 
-    answerCall, 
-    callerName, 
-    callAccepted, 
-    callEnded 
-  } = useWebRTC();
+ const { 
+  callUser, 
+  receivingCall, 
+  answerCall, 
+  callAccepted, 
+  callEnded 
+} = useWebRTC();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleChat = () => setIsChatOpen(!isChatOpen);
