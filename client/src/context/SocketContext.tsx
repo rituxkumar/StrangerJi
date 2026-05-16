@@ -32,7 +32,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     // Replace with your server URL
-    const socketInstance = io(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000');
+   const socketInstance = io(process.env.NEXT_PUBLIC_SERVER_URL as string);
     
     socketInstance.on('connect', () => {
       console.log('Connected to socket server');
