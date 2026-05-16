@@ -13,7 +13,7 @@ interface ChatContainerProps {
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, toggleChat }) => {
-  const { messages, sendMessage, typingStatus, sendTypingStatus } = useChat();
+  const { messages, sendMessage, typingStatus, sendTypingStatus, resetUnreadCount } = useChat();
   const { me } = useSocket();
   const { caller, callAccepted, callEnded } = useWebRTC();
   const [input, setInput] = useState('');
@@ -21,6 +21,12 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, toggleChat }) => 
 
   // For this simple version, we chat with the current caller or the last active user
   const chatTarget = caller;
+
+  useEffect(() => {
+    if (isOpen) {
+      resetUnreadCount();
+    }
+  }, [isOpen, resetUnreadCount]);
 
   useEffect(() => {
     if (scrollRef.current) {

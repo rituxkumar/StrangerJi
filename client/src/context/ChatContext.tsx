@@ -14,6 +14,8 @@ interface ChatContextType {
   sendMessage: (to: string, message: string) => void;
   typingStatus: { [userId: string]: boolean };
   sendTypingStatus: (to: string, isTyping: boolean) => void;
+  unreadCount: number;
+  resetUnreadCount: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -30,12 +32,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { socket, me } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingStatus, setTypingStatus] = useState<{ [userId: string]: boolean }>({});
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!socket) return;
 
     socket.on('receive-message', (data: Message) => {
       setMessages((prev) => [...prev, data]);
+      setUnreadCount((prev) => prev + 1);
+      
+      // Play message sound
+      const audio = new Audio('/sounds/message.mp3');
+      audio.play().catch(e => console.log('Sound play blocked by browser'));
     });
 
     socket.on('typing', ({ from }) => {
@@ -71,8 +79,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     socket.emit(isTyping ? 'typing' : 'stop-typing', { to, from: me });
   };
 
+  const resetUnreadCount = () => {
+    setUnreadCount(0);
+  };
+
   return (
-    <ChatContext.Provider value={{ messages, sendMessage, typingStatus, sendTypingStatus }}>
+    <ChatContext.Provider value={{ messages, sendMessage, typingStatus, sendTypingStatus, unreadCount, resetUnreadCount }}>
       {children}
     </ChatContext.Provider>
   );

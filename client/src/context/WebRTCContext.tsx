@@ -125,6 +125,10 @@ export const WebRTCProvider: React.FC<{
         setCallerName(name);
         setCallerSignal(signal);
         setReceivingCall(true);
+        
+        // Play ringing sound
+        const audio = new Audio('/sounds/ringtone.mp3');
+        audio.play().catch(e => console.log('Sound play blocked by browser'));
       }
     };
 
@@ -163,13 +167,7 @@ export const WebRTCProvider: React.FC<{
     };
   }, [socket, callAccepted, callEnded]);
 
-  // Auto-answer effect: Trigger answerCall as soon as receivingCall is true and stream is ready
-  useEffect(() => {
-    if (receivingCall && !callAccepted && stream && callerSignal) {
-      console.log('Auto-answering incoming call...');
-      answerCall();
-    }
-  }, [receivingCall, callAccepted, stream, callerSignal]);
+  // Remove auto-answer effect as manual acceptance is now required
 
   // Call another user
   const callUser = (id: string) => {

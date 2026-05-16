@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const mediaConstraints = {
-  audio: true,
+  audio: {
+    echoCancellation: true,
+    noiseSuppression: true,
+  },
   video: {
     width: 640,
     height: 480,

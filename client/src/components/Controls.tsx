@@ -12,11 +12,14 @@ import {
   MessageSquare
 } from 'lucide-react';
 
+import { useChat } from '@/context/ChatContext';
+
 interface ControlsProps {
   toggleChat: () => void;
 }
 
 const Controls: React.FC<ControlsProps> = ({ toggleChat }) => {
+  const { unreadCount } = useChat();
   const { 
     leaveCall, 
     toggleVideo, 
@@ -60,9 +63,14 @@ const Controls: React.FC<ControlsProps> = ({ toggleChat }) => {
 
         <button
           onClick={toggleChat}
-          className="p-4 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 lg:hidden transition-all duration-300"
+          className="p-4 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 transition-all duration-300 relative"
         >
           <MessageSquare className="w-6 h-6" />
+          {unreadCount > 0 && (
+            <span className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#0a0a0a]">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {inCall && (
