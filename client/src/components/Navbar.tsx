@@ -20,7 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           <Video className="text-primary w-6 h-6" />
         </motion.div>
         <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-          StrangerJi
+          StrangerJi.
         </h1>
       </div>
 
