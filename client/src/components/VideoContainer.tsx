@@ -35,7 +35,7 @@ const VideoContainer: React.FC = () => {
           
           <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full glass-dark border border-white/10 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            You
+            Owner (You)
           </div>
 
           <AnimatePresence>

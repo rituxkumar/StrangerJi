@@ -7,6 +7,7 @@ interface User {
   id: string;
   username: string;
   status: 'online' | 'offline';
+  busy: boolean;
 }
 
 interface SocketContextType {

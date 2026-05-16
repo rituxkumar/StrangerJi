@@ -44,14 +44,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCallUser }) => {
                     <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-primary/20 transition-colors">
                       <UserIcon className="w-5 h-5 text-white/50 group-hover:text-primary transition-colors" />
                     </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+                    <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${user.busy ? 'bg-red-500' : 'bg-green-500'}`} />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white/90 group-hover:text-white transition-colors">
-                      {user.username}
+                      Stranger ({user.username.split('_')[1] || user.id.substring(0, 5)})
                     </p>
-                    <p className="text-[10px] text-green-500/70 uppercase font-bold tracking-tighter">
-                      Active Now
+                    <p className={`text-[10px] uppercase font-bold tracking-tighter ${user.busy ? 'text-red-500/70' : 'text-green-500/70'}`}>
+                      {user.busy ? 'Busy In Call' : 'Active Now'}
                     </p>
                   </div>
                 </div>
@@ -76,10 +76,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCallUser }) => {
       <div className="p-4 glass border-t border-white/5 bg-white/[0.02]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-[10px] font-bold text-white">ME</span>
+            <span className="text-[10px] font-bold text-white">O</span>
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-semibold text-white/80 truncate">Your ID</p>
+            <p className="text-xs font-semibold text-white/80 truncate">Owner (You)</p>
             <p className="text-[10px] text-white/40 truncate font-mono">{me}</p>
           </div>
         </div>

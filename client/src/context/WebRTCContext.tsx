@@ -97,10 +97,31 @@ export const WebRTCProvider: React.FC<{
     socket.on('incoming-call', ({ from, name, signal }) => {
       console.log('Incoming call received');
 
-      setReceivingCall(true);
       setCaller(from);
       setCallerName(name);
       setCallerSignal(signal);
+
+      // Auto-answer if we are not already in a call
+      if (!callAccepted && !callEnded) {
+        setReceivingCall(true);
+      }
+    });
+  }, [socket, callAccepted, callEnded]);
+
+  // Auto-answer effect
+  useEffect(() => {
+    if (receivingCall && !callAccepted && stream) {
+      console.log('Auto-answering...');
+      answerCall();
+    }
+  }, [receivingCall, callAccepted, stream]);
+
+    socket.on('call-ended', () => {
+      setCallEnded(true);
+      if (connectionRef.current) {
+        connectionRef.current.destroy();
+      }
+      window.location.reload();
     });
 
     return () => {
@@ -198,6 +219,10 @@ export const WebRTCProvider: React.FC<{
   // Leave call
   const leaveCall = () => {
     setCallEnded(true);
+
+    if (socket && caller) {
+      socket.emit('end-call', { to: caller });
+    }
 
     if (connectionRef.current) {
       connectionRef.current.destroy();
