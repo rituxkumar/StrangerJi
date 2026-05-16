@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Peer from 'simple-peer';
 import { useSocket } from './SocketContext';
 import { useMediaStream } from '@/hooks/useMediaStream';
@@ -9,16 +15,23 @@ interface WebRTCContextType {
   callUser: (id: string) => void;
   answerCall: () => void;
   leaveCall: () => void;
+
   callAccepted: boolean;
   callEnded: boolean;
   receivingCall: boolean;
+
   caller: string;
+  callerName: string;
   callerSignal: any;
+
   userVideo: React.RefObject<HTMLVideoElement | null>;
   myVideo: React.RefObject<HTMLVideoElement | null>;
+
   stream: MediaStream | null;
+
   toggleVideo: () => void;
   toggleAudio: () => void;
+
   isVideoEnabled: boolean;
   isAudioEnabled: boolean;
 }
@@ -27,60 +40,88 @@ const WebRTCContext = createContext<WebRTCContextType | undefined>(undefined);
 
 export const useWebRTC = () => {
   const context = useContext(WebRTCContext);
+
   if (!context) {
     throw new Error('useWebRTC must be used within a WebRTCProvider');
   }
+
   return context;
 };
 
-export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const WebRTCProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const { socket, me } = useSocket();
-  const { stream, toggleVideo: toggleV, toggleAudio: toggleA } = useMediaStream();
+
+  const {
+    stream,
+    toggleVideo: toggleV,
+    toggleAudio: toggleA,
+  } = useMediaStream();
 
   const [callAccepted, setCallAccepted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
   const [receivingCall, setReceivingCall] = useState(false);
+
   const [caller, setCaller] = useState('');
   const [callerName, setCallerName] = useState('');
   const [callerSignal, setCallerSignal] = useState<any>(null);
-  
+
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
   const myVideo = useRef<HTMLVideoElement | null>(null);
   const userVideo = useRef<HTMLVideoElement | null>(null);
+
   const connectionRef = useRef<Peer.Instance | null>(null);
 
+  // Show local video
   useEffect(() => {
     if (stream && myVideo.current) {
       myVideo.current.srcObject = stream;
     }
   }, [stream]);
 
+  // Listen for incoming calls
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('incoming-call', ({ from, name: callerName, signal }) => {
+    socket.on('incoming-call', ({ from, name, signal }) => {
+      console.log('Incoming call received');
+
       setReceivingCall(true);
       setCaller(from);
-      setCallerName(callerName);
+      setCallerName(name);
       setCallerSignal(signal);
     });
+
+    return () => {
+      socket.off('incoming-call');
+    };
   }, [socket]);
 
+  // Call another user
   const callUser = (id: string) => {
     if (!stream || !socket) return;
+
+    console.log('Calling user:', id);
 
     const peer = new Peer({
       initiator: true,
       trickle: false,
-      stream: stream,
+      stream,
       config: {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-      }
+        iceServers: [
+          {
+            urls: 'stun:stun.l.google.com:19302',
+          },
+        ],
+      },
     });
 
     peer.on('signal', (data) => {
+      console.log('Sending offer');
+
       socket.emit('call-user', {
         userToCall: id,
         signalData: data,
@@ -90,12 +131,16 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     peer.on('stream', (currentStream) => {
+      console.log('Received remote stream');
+
       if (userVideo.current) {
         userVideo.current.srcObject = currentStream;
       }
     });
 
     socket.on('call-accepted', (signal) => {
+      console.log('Call accepted');
+
       setCallAccepted(true);
       peer.signal(signal);
     });
@@ -103,50 +148,72 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     connectionRef.current = peer;
   };
 
+  // Answer incoming call
   const answerCall = () => {
     if (!stream || !socket) return;
+
+    console.log('Answering call');
 
     setCallAccepted(true);
 
     const peer = new Peer({
       initiator: false,
       trickle: false,
-      stream: stream,
+      stream,
       config: {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-      }
+        iceServers: [
+          {
+            urls: 'stun:stun.l.google.com:19302',
+          },
+        ],
+      },
     });
 
     peer.on('signal', (data) => {
-      socket.emit('answer-call', { signal: data, to: caller });
+      console.log('Sending answer');
+
+      socket.emit('answer-call', {
+        signal: data,
+        to: caller,
+      });
     });
 
     peer.on('stream', (currentStream) => {
+      console.log('Remote stream connected');
+
       if (userVideo.current) {
         userVideo.current.srcObject = currentStream;
       }
     });
 
-    peer.signal(callerSignal);
+    if (callerSignal) {
+      peer.signal(callerSignal);
+    }
+
     connectionRef.current = peer;
   };
 
+  // Leave call
   const leaveCall = () => {
     setCallEnded(true);
+
     if (connectionRef.current) {
       connectionRef.current.destroy();
     }
-    window.location.reload(); // Simple way to reset state
+
+    window.location.reload();
   };
 
+  // Toggle camera
   const toggleVideo = () => {
     toggleV();
-    setIsVideoEnabled(!isVideoEnabled);
+    setIsVideoEnabled((prev) => !prev);
   };
 
+  // Toggle microphone
   const toggleAudio = () => {
     toggleA();
-    setIsAudioEnabled(!isAudioEnabled);
+    setIsAudioEnabled((prev) => !prev);
   };
 
   return (
@@ -155,16 +222,23 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         callUser,
         answerCall,
         leaveCall,
+
         callAccepted,
         callEnded,
         receivingCall,
+
         caller,
+        callerName,
         callerSignal,
+
         userVideo,
         myVideo,
+
         stream,
+
         toggleVideo,
         toggleAudio,
+
         isVideoEnabled,
         isAudioEnabled,
       }}
