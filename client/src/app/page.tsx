@@ -24,6 +24,13 @@ export default function Home() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleChat = () => setIsChatOpen(!isChatOpen);
 
+  // Auto-open chat when call is established
+  React.useEffect(() => {
+    if (callAccepted && !callEnded) {
+      setIsChatOpen(true);
+    }
+  }, [callAccepted, callEnded]);
+
   return (
     <main className="h-screen flex flex-col bg-[#0a0a0a] text-white overflow-hidden">
       <Navbar toggleSidebar={toggleSidebar} />

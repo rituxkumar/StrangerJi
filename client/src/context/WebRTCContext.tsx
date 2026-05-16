@@ -176,6 +176,8 @@ export const WebRTCProvider: React.FC<{
     if (!stream || !socket) return;
 
     console.log('Calling user:', id);
+    setCaller(id); // Set target for signaling and chat
+    setCallEnded(false);
 
     const peer = new Peer({
       initiator: true,
